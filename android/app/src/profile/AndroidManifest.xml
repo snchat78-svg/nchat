@@ -1,0 +1,5 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Development के दौरान जरूरी permission -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+</manifest>

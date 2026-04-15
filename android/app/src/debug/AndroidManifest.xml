@@ -1,0 +1,5 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Development में जरूरी: Flutter tool को running app से communicate करने के लिए -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+</manifest>

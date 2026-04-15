@@ -1,0 +1,46 @@
+// ---------------- android/build.gradle ----------------
+buildscript {
+    ext {
+        kotlin_version = '1.8.22'   // Kotlin 1.8.x → jvmTarget=1.8 friendly
+        agp_version    = '8.0.2'    // Android Gradle Plugin
+        gms_version    = '4.3.15'   // Google Services
+    }
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:$agp_version"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "com.google.gms:google-services:$gms_version"
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+// Flutter defaults
+rootProject.buildDir = '../build'
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+    project.evaluationDependsOn(':app')
+}
+
+/* ✅ Extra block — सभी subprojects/plugins को force किया jvmTarget = 1.8 */
+subprojects {
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+        if (kotlinOptions.hasProperty('jvmTarget')) {
+            kotlinOptions.jvmTarget = '1.8'
+        }
+    }
+}
+
+// Clean task
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}
+// ---------------- end ----------------
