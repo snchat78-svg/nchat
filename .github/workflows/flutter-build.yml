@@ -1,7 +1,7 @@
 name: Build Flutter APK & AAB
 
 on:
-  workflow_dispatch:   # 👉 manual run (auto run band)
+  workflow_dispatch:   # 👉 manual run only
 
 jobs:
   build:
@@ -25,13 +25,15 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
+      # ✅ FIX 1: Keystore decode (same)
       - name: Decode Keystore
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-key.jks
 
+      # ✅ FIX 2: Correct ENV path (IMPORTANT)
       - name: Set ENV
         run: |
-          echo "KEYSTORE_PATH=android/app/upload-key.jks" >> $GITHUB_ENV
+          echo "KEYSTORE_PATH=upload-key.jks" >> $GITHUB_ENV
           echo "STORE_PASSWORD=${{ secrets.STORE_PASSWORD }}" >> $GITHUB_ENV
           echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> $GITHUB_ENV
           echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> $GITHUB_ENV
@@ -39,11 +41,11 @@ jobs:
       - name: Clean
         run: flutter clean
 
-      # ✅ SINGLE APK (important)
+      # ✅ ONLY ONE APK (no split)
       - name: Build APK
         run: flutter build apk --release
 
-      # ✅ Play Store ke liye
+      # ✅ Play Store AAB
       - name: Build AAB
         run: flutter build appbundle --release
 
