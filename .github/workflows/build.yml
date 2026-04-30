@@ -17,6 +17,14 @@ jobs:
           distribution: temurin
           java-version: "17"
 
+      # ✅ Android SDK install + API 35 fix
+      - name: Install Android SDK 35
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget unzip
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -25,25 +33,27 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      # ✅ FIX 1: Keystore decode (same)
+      # ✅ Keystore decode
       - name: Decode Keystore
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-key.jks
-      # ✅ FIX 2: Correct ENV path (IMPORTANT)
+
+      # ✅ ENV variables
       - name: Set ENV
         run: |
           echo "KEYSTORE_PATH=upload-key.jks" >> $GITHUB_ENV
           echo "STORE_PASSWORD=${{ secrets.STORE_PASSWORD }}" >> $GITHUB_ENV
           echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> $GITHUB_ENV
           echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> $GITHUB_ENV
+
       - name: Clean
         run: flutter clean
 
-      # ✅ ONLY ONE APK (no split)
+      # ✅ Build APK
       - name: Build APK
         run: flutter build apk --release
 
-      # ✅ Play Store AAB
+      # ✅ Build AAB
       - name: Build AAB
         run: flutter build appbundle --release
 
