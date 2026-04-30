@@ -1,0 +1,60 @@
+name: Build Flutter APK & AAB
+
+on:
+  workflow_dispatch:   # 👉 manual run only
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.22.0"
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      # ✅ FIX 1: Keystore decode (same)
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-key.jks
+      # ✅ FIX 2: Correct ENV path (IMPORTANT)
+      - name: Set ENV
+        run: |
+          echo "KEYSTORE_PATH=upload-key.jks" >> $GITHUB_ENV
+          echo "STORE_PASSWORD=${{ secrets.STORE_PASSWORD }}" >> $GITHUB_ENV
+          echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> $GITHUB_ENV
+          echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> $GITHUB_ENV
+      - name: Clean
+        run: flutter clean
+
+      # ✅ ONLY ONE APK (no split)
+      - name: Build APK
+        run: flutter build apk --release
+
+      # ✅ Play Store AAB
+      - name: Build AAB
+        run: flutter build appbundle --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: aab
+          path: build/app/outputs/bundle/release/app-release.aab
