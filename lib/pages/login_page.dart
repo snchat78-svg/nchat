@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
 import '../services/auth_service.dart';
 import '../services/user_service.dart';
@@ -100,13 +101,20 @@ if (userModel == null || (userModel.name?.isEmpty ?? true)) {
   );
 
 }
-    } catch (e) {
-      setState(() => isLoading = false);
-      if (!mounted) return;
-      ScaffoldMessenger.of(ctx).showSnackBar(
-        SnackBar(content: Text("Error: ${e.toString()}")),
-      );
-    }
+    } catch (e, stackTrace) {
+  setState(() => isLoading = false);
+
+  // 🔥 PC (adb logcat) में दिखेगा
+  debugPrint("🔥 LOGIN ERROR: ${e.toString()}");
+  debugPrint("📍 STACK TRACE: $stackTrace");
+
+  if (!mounted) return;
+
+  // 👉 screen पर भी दिखे (optional)
+  ScaffoldMessenger.of(ctx).showSnackBar(
+    SnackBar(content: Text("Error: ${e.toString()}")),
+  );
+}
   }
 
   @override

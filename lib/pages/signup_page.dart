@@ -103,21 +103,34 @@ class _SignupPageState extends State<SignupPage> {
 
 // Signup के बाद user को Login page पर भेजो
 Navigator.pop(scaffoldContext);
-    } on FirebaseAuthException catch (e) {
-      final msg = e.code == 'email-already-in-use'
-          ? '⚠️ यह ईमेल पहले से उपयोग में है'
-          : e.message ?? 'Authentication error';
-      if (mounted) {
-        ScaffoldMessenger.of(scaffoldContext).showSnackBar(
-          SnackBar(content: Text(msg)),
-        );
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(scaffoldContext).showSnackBar(
-        SnackBar(content: Text("❌ Error: $e")),
-      );
-    } finally {
+    } on FirebaseAuthException catch (e, stackTrace) {
+
+  // 🔥 PC में दिखेगा (adb logcat)
+  debugPrint("🔥 SIGNUP AUTH ERROR: ${e.code} - ${e.message}");
+  debugPrint("📍 STACK TRACE: $stackTrace");
+
+  final msg = e.code == 'email-already-in-use'
+      ? '⚠️ यह ईमेल पहले से उपयोग में है'
+      : e.message ?? 'Authentication error';
+
+  if (mounted) {
+    ScaffoldMessenger.of(scaffoldContext).showSnackBar(
+      SnackBar(content: Text(msg)),
+    );
+  }
+} catch (e, stackTrace) {
+
+  // 🔥 PC में दिखेगा
+  debugPrint("🔥 SIGNUP GENERAL ERROR: ${e.toString()}");
+  debugPrint("📍 STACK TRACE: $stackTrace");
+
+  if (!mounted) return;
+
+  ScaffoldMessenger.of(scaffoldContext).showSnackBar(
+    SnackBar(content: Text("❌ Error: $e")),
+  );
+}
+ finally {
       if (mounted) setState(() => isLoading = false);
     }
   }

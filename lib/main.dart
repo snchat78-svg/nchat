@@ -37,26 +37,36 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
 
-  await FirebaseMessaging.instance.requestPermission(
-    alert: true,
-    badge: true,
-    sound: true,
-  );
+  try {
+    await Firebase.initializeApp();
+    print("✅ Firebase Init Success");
+  } catch (e) {
+    print("❌ Firebase Init Error: $e");
+  }
 
-  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
-    alert: true,
-    badge: true,
-    sound: true,
-  );
+  try {
+    await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
 
-  await PushNotificationService.initializeLocalNotifications();
+    await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
 
-  final pushService = PushNotificationService();
-  await pushService.init();
+    await PushNotificationService.initializeLocalNotifications();
 
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    final pushService = PushNotificationService();
+    await pushService.init();
+
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  } catch (e) {
+    print("❌ Notification Init Error: $e");
+  }
 
   runApp(const MyApp());
 }
@@ -215,6 +225,7 @@ class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
 
   Future<Widget> _handleUser() async {
+  try {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) return const LoginPage();
@@ -222,27 +233,42 @@ class AuthGate extends StatelessWidget {
     if (!user.emailVerified) return const LoginPage();
 
     final userService = UserService();
-    final userModel = await userService.getUserById(user.uid);
+
+    final userModel = await userService
+        .getUserById(user.uid)
+        .timeout(const Duration(seconds: 10)); // 🔥 FIX
 
     if (userModel == null || userModel.userType.isEmpty) {
       return const RegisterPersonPage();
     }
 
     return const HomePage();
+
+  } catch (e) {
+    print("❌ AuthGate Error: $e");
+    return const LoginPage(); // 🔥 fallback
   }
+}
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Widget>(
       future: _handleUser(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-        return snapshot.data ?? const LoginPage();
-      },
+  if (snapshot.connectionState == ConnectionState.waiting) {
+    return const Scaffold(
+      body: Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  if (snapshot.hasError) {
+    return const Scaffold(
+      body: Center(child: Text("Something went wrong")),
+    );
+  }
+
+  return snapshot.data ?? const LoginPage();
+}
     );
   }
 }

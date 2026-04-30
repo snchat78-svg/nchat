@@ -2,7 +2,7 @@
 buildscript {
     ext {
         kotlin_version = '1.8.22'   // Kotlin 1.8.x → jvmTarget=1.8 friendly
-        agp_version    = '8.0.2'    // Android Gradle Plugin
+        agp_version    = '7.4.2'    // Android Gradle Plugin
         gms_version    = '4.3.15'   // Google Services
     }
     repositories {
