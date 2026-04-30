@@ -17,12 +17,13 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      # ✅ Android SDK install + API 35 fix
-      - name: Install Android SDK 35
+      # ✅ FIX: Android SDK setup (sdkmanager available करेगा)
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      # ✅ FIX: API 35 install
+      - name: Install API 35
         run: |
-          sudo apt-get update
-          sudo apt-get install -y wget unzip
-          yes | sdkmanager --licenses
           sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Setup Flutter
