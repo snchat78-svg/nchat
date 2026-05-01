@@ -1,7 +1,7 @@
 name: Build Flutter APK & AAB
 
 on:
-  workflow_dispatch:   # 👉 manual run only
+  workflow_dispatch:
 
 jobs:
   build:
@@ -17,11 +17,11 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      # ✅ FIX: Android SDK setup (sdkmanager available करेगा)
+      # ✅ Android SDK setup
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # ✅ FIX: API 35 install
+      # ✅ Install API 35
       - name: Install API 35
         run: |
           sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
@@ -34,18 +34,18 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      # ✅ Keystore decode
+      # ✅ Decode Keystore
       - name: Decode Keystore
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-key.jks
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/upload-key.jks
 
-      # ✅ ENV variables
-      - name: Set ENV
+      # 🔥 NEW STEP (MOST IMPORTANT)
+      - name: Create key.properties
         run: |
-          echo "KEYSTORE_PATH=upload-key.jks" >> $GITHUB_ENV
-          echo "STORE_PASSWORD=${{ secrets.STORE_PASSWORD }}" >> $GITHUB_ENV
-          echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> $GITHUB_ENV
-          echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> $GITHUB_ENV
+          echo "storePassword=${{ secrets.STORE_PASSWORD }}" > android/app/key.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/app/key.properties
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/app/key.properties
+          echo "storeFile=upload-key.jks" >> android/app/key.properties
 
       - name: Clean
         run: flutter clean
