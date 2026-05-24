@@ -1,4 +1,11 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- ✅ FORCE REMOVE Background Location -->
+    <uses-permission
+        android:name="android.permission.ACCESS_BACKGROUND_LOCATION"
+        tools:node="remove"/>
 
     <!-- 🔓 Permissions -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
@@ -12,7 +19,7 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
-        <!-- 🔴 REQUIRED FOR NOTIFICATION CHANNEL -->
+        <!-- 🔴 Firebase Notification Channel -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="high_importance_channel"/>
@@ -36,19 +43,20 @@
             </intent-filter>
         </activity>
 
-        <!-- 🔧 Firebase Installations -->
+        <!-- Firebase Installations -->
         <service
             android:name="com.google.firebase.installations.FirebaseInstallationsService"
             android:exported="false"/>
 
-        <!-- 🧭 Google Maps -->
+        <!-- Google Maps API -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCUK7TJVNvXrcJT8CxVlA0KzaKRJtTcAgw"/>
+            android:value="YOUR_GOOGLE_MAPS_API_KEY"/>
 
-        <!-- 🔧 Flutter embedding -->
+        <!-- Flutter embedding -->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2"/>
     </application>
+
 </manifest>
