@@ -24,6 +24,7 @@ class _RegisterPersonPageState extends State<RegisterPersonPage> {
   File? selectedImage;
   String? profilePicUrl;
   Position? currentPosition;
+  String selectedGender = '';
 
   @override
   void initState() {
@@ -91,7 +92,11 @@ class _RegisterPersonPageState extends State<RegisterPersonPage> {
 
     final age = int.tryParse(ageText);
 
-    if (name.isEmpty || age == null || currentPosition == null || uid == null) {
+    if (name.isEmpty ||
+    age == null ||
+    selectedGender.isEmpty ||
+    currentPosition == null ||
+    uid == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('⚠️ कृपया सभी जानकारी और लोकेशन दर्ज करें')),
       );
@@ -110,8 +115,9 @@ class _RegisterPersonPageState extends State<RegisterPersonPage> {
       'email': FirebaseAuth.instance.currentUser?.email ?? '',
       'userType': 'person',
       'name': name,
-      'age': age,
-      'profilePic': profilePicUrl ?? '',
+'age': age,
+'gender': selectedGender,
+'profilePic': profilePicUrl ?? '',
       'latitude': currentPosition!.latitude,
       'longitude': currentPosition!.longitude,
       'createdAt': FieldValue.serverTimestamp(),
@@ -141,16 +147,46 @@ class _RegisterPersonPageState extends State<RegisterPersonPage> {
               decoration: const InputDecoration(labelText: 'Name'),
             ),
             const SizedBox(height: 12),
-            TextField(
-              controller: ageController,
-              decoration: const InputDecoration(labelText: 'Age'),
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(3),
-              ],
-            ),
-            const SizedBox(height: 16),
+           TextField(
+  controller: ageController,
+  decoration: const InputDecoration(labelText: 'Age'),
+  keyboardType: TextInputType.number,
+  inputFormatters: [
+    FilteringTextInputFormatter.digitsOnly,
+    LengthLimitingTextInputFormatter(3),
+  ],
+),
+
+const SizedBox(height: 12),
+
+DropdownButtonFormField<String>(
+  value: selectedGender.isNotEmpty ? selectedGender : null,
+  decoration: const InputDecoration(
+    labelText: "Gender",
+    border: OutlineInputBorder(),
+  ),
+  items: const [
+    DropdownMenuItem(
+      value: 'Male',
+      child: Text('Male'),
+    ),
+    DropdownMenuItem(
+      value: 'Female',
+      child: Text('Female'),
+    ),
+    DropdownMenuItem(
+      value: 'Other',
+      child: Text('Other'),
+    ),
+  ],
+  onChanged: (v) {
+    setState(() {
+      selectedGender = v ?? '';
+    });
+  },
+),
+
+const SizedBox(height: 16),
 
             ElevatedButton.icon(
               onPressed: pickAndUploadImage,
