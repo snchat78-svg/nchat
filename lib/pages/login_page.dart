@@ -128,15 +128,22 @@ if (userModel == null || (userModel.name?.isEmpty ?? true)) {
             child: Column(
               children: [
 
-                const SizedBox(height: 40),
+                const SizedBox(height: 20),
 
-                const Text(
-                  "Welcome Back",
-                  style: TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+Image.asset(
+  'assets/images/nchat_logo.png',
+  height: 90,
+),
+
+const SizedBox(height: 15),
+
+const Text(
+  "Welcome",
+  style: TextStyle(
+    fontSize: 26,
+    fontWeight: FontWeight.bold,
+  ),
+),
 
                 const SizedBox(height: 8),
 
