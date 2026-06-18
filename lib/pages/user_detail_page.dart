@@ -9,6 +9,8 @@ import '../models/chat_request_model.dart';
 import '../services/chat_request_service.dart';
 import '../services/block_service.dart';
 import '../styles/app_styles.dart';
+import 'package:intl/intl.dart';
+
 
 class UserDetailPage extends StatefulWidget {
   final UserModel targetUser;
@@ -290,11 +292,12 @@ class _UserDetailPageState extends State<UserDetailPage> {
             const SizedBox(height: 12),
 
             if (u.lastSeen != null)
-              Text(
-                "🕒 Last seen: ${u.lastSeen!.toLocal()}",
-                style: AppStyles.subHeading
-                    .copyWith(fontSize: 13),
-              ),
+  Text(
+    "🕒 Last seen: ${DateFormat('dd MMM yyyy, hh:mm a').format(u.lastSeen!.toLocal())}",
+    style: AppStyles.subHeading.copyWith(
+      fontSize: 13,
+    ),
+  ),
           ],
         ),
       ),
