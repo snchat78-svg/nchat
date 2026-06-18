@@ -9,6 +9,8 @@ import '../services/block_service.dart';
 import '../styles/app_styles.dart';
 import 'chat_room_page.dart';
 import 'user_detail_page.dart';
+import 'package:intl/intl.dart';
+
 
 
 class ChatUsersPage extends StatefulWidget {
@@ -237,18 +239,18 @@ class _ChatUsersPageState extends State<ChatUsersPage> {
                                 ),
 
                                 // 🔹 Last Seen
-                                if (user.online != true &&
-                                    user.lastSeen != null)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 2),
-                                    child: Text(
-                                      "Last seen: ${user.lastSeen}",
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ),
+                               if (user.online != true &&
+    user.lastSeen != null)
+  Padding(
+    padding: const EdgeInsets.only(top: 2),
+    child: Text(
+      "Last seen: ${DateFormat('dd MMM yyyy, hh:mm a').format(user.lastSeen!.toLocal())}",
+      style: const TextStyle(
+        fontSize: 11,
+        color: Colors.grey,
+      ),
+    ),
+  ),
                               ],
                             ),
 
