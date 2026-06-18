@@ -98,43 +98,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
           const SizedBox(height: 28),
 
-          // 🔹 ACCOUNT SECTION TITLE
-          Text(
-            "ACCOUNT",
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey.shade600,
-              letterSpacing: 1.2,
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // 🔹 ACCOUNT CARD
-          Card(
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Column(
-              children: [
-                _buildSettingsTile(
-                  icon: Icons.person_outline,
-                  title: "My Profile",
-                  subtitle: "View & edit your profile",
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const ProfilePage()),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 28),
-
+         
           // 🔹 APP INFO SECTION TITLE
           Text(
             "APP INFO",
