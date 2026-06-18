@@ -131,7 +131,7 @@ if (userModel == null || (userModel.name?.isEmpty ?? true)) {
                 const SizedBox(height: 20),
 
 Image.asset(
-  'assets/images/nchat_logo.png',
+  'assets/icons/app_icon.png',
   height: 90,
 ),
 
