@@ -36,7 +36,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _shareApp() {
-    const appLink = 'https://play.google.com/store/apps/details?id=com.nchat.app';
+    const appLink = 'https://play.google.com/store/apps/details?id=com.nearby.nchat';
     Share.share(
       '🚀 Download Nchat App and chat with nearby people!\n\n$appLink',
       subject: 'Nchat - Nearby Chat App',
