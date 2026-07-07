@@ -38,7 +38,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   final Set<String> selectedMessageIds = {};
   bool selectionMode = false;
 
-  bool _seenMarked = false;
 
   @override
   void initState() {
@@ -94,18 +93,18 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   }
 
   Future<void> _markMessagesAsSeen(List<QueryDocumentSnapshot> docs) async {
-    if (_seenMarked) return;
-    _seenMarked = true;
+  for (var doc in docs) {
+    final data = doc.data() as Map<String, dynamic>;
 
-    for (var doc in docs) {
-      final data = doc.data() as Map<String, dynamic>;
-      if (data['senderId'] != currentUid && data['seenAt'] == null) {
-        await doc.reference.update({
-          'seenAt': FieldValue.serverTimestamp(),
-        });
-      }
+    if (data['receiverId'] == currentUid &&
+        data['seenAt'] == null) {
+      await doc.reference.update({
+        'seenAt': FieldValue.serverTimestamp(),
+      });
     }
   }
+}
+
 
   /// 🔴 delete logic SAME
   Future<void> _deleteSelectedMessages() async {
@@ -175,7 +174,9 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                 }
 
                 final docs = snapshot.data!.docs;
-                _markMessagesAsSeen(docs);
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+  _markMessagesAsSeen(docs);
+});
 
                 return ListView.builder(
                   reverse: true,
