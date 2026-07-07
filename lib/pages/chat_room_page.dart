@@ -92,19 +92,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     );
   }
 
-  Future<void> _markMessagesAsSeen(List<QueryDocumentSnapshot> docs) async {
-  for (var doc in docs) {
-    final data = doc.data() as Map<String, dynamic>;
-
-    if (data['receiverId'] == currentUid &&
-        data['seenAt'] == null) {
-      await doc.reference.update({
-        'seenAt': FieldValue.serverTimestamp(),
-      });
-    }
-  }
-}
-
 
   /// 🔴 delete logic SAME
   Future<void> _deleteSelectedMessages() async {
@@ -174,8 +161,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                 }
 
                 final docs = snapshot.data!.docs;
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-  _markMessagesAsSeen(docs);
+               WidgetsBinding.instance.addPostFrameCallback((_) {
+  _chatService.markMessagesAsSeen(widget.targetUser.uid);
 });
 
                 return ListView.builder(
