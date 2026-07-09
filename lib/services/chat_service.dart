@@ -136,17 +136,21 @@ class ChatService {
 
   // ================= UNREAD COUNT =================
   Stream<int> getUnreadCount(String otherUid) {
-    final roomId = _getRoomId(otherUid);
+  final roomId = _getRoomId(otherUid);
 
-    return _firestore
-        .collection("chatRooms")
-        .doc(roomId)
-        .collection("messages")
-        .where("receiverId", isEqualTo: _auth.currentUser!.uid)
-        .where("seenAt", isEqualTo: null)
-        .snapshots()
-        .map((snap) => snap.docs.length);
-  }
+  return _firestore
+      .collection("chatRooms")
+      .doc(roomId)
+      .collection("messages")
+      .where("receiverId", isEqualTo: _auth.currentUser!.uid)
+      .snapshots()
+      .map((snap) {
+        return snap.docs.where((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          return data["seenAt"] == null;
+        }).length;
+      });
+}
 
   // ================= MARK AS SEEN =================
   Future<void> markMessagesAsSeen(String otherUid) async {
