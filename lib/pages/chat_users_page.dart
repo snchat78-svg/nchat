@@ -286,15 +286,18 @@ class _ChatUsersPageState extends State<ChatUsersPage> {
                                   currentUid!, user.uid);
                             },
 
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      ChatRoomPage(targetUser: user),
-                                ),
-                              );
-                            },
+                           onTap: () async {
+  await Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => ChatRoomPage(targetUser: user),
+    ),
+  );
+
+  if (mounted) {
+    setState(() {});
+  }
+}
                           ),
                         ),
                       );
