@@ -54,9 +54,14 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   }
 
   Future<void> _initChatRoom() async {
-    await _chatService.ensureRoomOnly(widget.targetUser.uid);
-    if (mounted) setState(() => roomReady = true);
+  await _chatService.ensureRoomOnly(widget.targetUser.uid);
+
+  await _chatService.markMessagesAsSeen(widget.targetUser.uid);
+
+  if (mounted) {
+    setState(() => roomReady = true);
   }
+}
 
   Future<void> _checkBlockStatus() async {
     if (currentUid == null) return;
@@ -161,9 +166,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                 }
 
                 final docs = snapshot.data!.docs;
-               WidgetsBinding.instance.addPostFrameCallback((_) {
-  _chatService.markMessagesAsSeen(widget.targetUser.uid);
-});
 
                 return ListView.builder(
                   reverse: true,
