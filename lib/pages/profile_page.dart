@@ -24,11 +24,23 @@ class _ProfilePageState extends State<ProfilePage> {
   UserModel? user;
   bool isEditing = false;
 
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _ageController = TextEditingController();
+ final TextEditingController _nameController = TextEditingController();
+final TextEditingController _ageController = TextEditingController();
 
-  String selectedGender = '';
+// 🔗 Social Links
+final TextEditingController _instagramController =
+    TextEditingController();
+final TextEditingController _facebookController =
+    TextEditingController();
+final TextEditingController _youtubeController =
+    TextEditingController();
 
+String selectedGender = '';
+
+// 👁️ Social Link Visibility
+bool instagramVisible = false;
+bool facebookVisible = false;
+bool youtubeVisible = false;
   @override
   void initState() {
     super.initState();
@@ -40,11 +52,21 @@ class _ProfilePageState extends State<ProfilePage> {
     if (!mounted || data == null) return;
 
     setState(() {
-      user = data;
-      _nameController.text = data.name ?? '';
-      _ageController.text = data.age?.toString() ?? '';
-      selectedGender = data.gender ?? '';
-    });
+  user = data;
+  _nameController.text = data.name ?? '';
+  _ageController.text = data.age?.toString() ?? '';
+  selectedGender = data.gender ?? '';
+
+  // 🔗 Load Social Links
+  _instagramController.text = data.instagram ?? '';
+  _facebookController.text = data.facebook ?? '';
+  _youtubeController.text = data.youtube ?? '';
+
+  // 👁️ Load Social Visibility
+  instagramVisible = data.instagramVisible;
+  facebookVisible = data.facebookVisible;
+  youtubeVisible = data.youtubeVisible;
+});
   }
 
   Future<void> _saveChanges() async {
@@ -63,10 +85,20 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     final updated = user!.copyWith(
-      name: name,
-      age: age,
-      gender: selectedGender,
-    );
+  name: name,
+  age: age,
+  gender: selectedGender,
+
+  // 🔗 Social Links
+  instagram: _instagramController.text.trim(),
+  facebook: _facebookController.text.trim(),
+  youtube: _youtubeController.text.trim(),
+
+  // 👁️ Social Link Visibility
+  instagramVisible: instagramVisible,
+  facebookVisible: facebookVisible,
+  youtubeVisible: youtubeVisible,
+);
 
     await _userService.saveUserData(updated);
 
@@ -96,6 +128,15 @@ class _ProfilePageState extends State<ProfilePage> {
 
     if (!mounted) return;
     setState(() => user = updated);
+  }
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _ageController.dispose();
+    _instagramController.dispose();
+    _facebookController.dispose();
+    _youtubeController.dispose();
+    super.dispose();
   }
 
   @override
@@ -225,11 +266,14 @@ class _ProfilePageState extends State<ProfilePage> {
                         : Text(selectedGender.isNotEmpty
                             ? selectedGender
                             : "Not set"),
-                  ),
+                                   ),
+                  
+                  // 🔗 SOCIAL LINKS
+                  _socialLinksSection(),
+
                   const SizedBox(height: 30),
 
                   if (isEditing)
-                    SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
                         onPressed: _saveChanges,
@@ -272,7 +316,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildAgeField() {
+    Widget _buildAgeField() {
     return TextField(
       controller: _ageController,
       enabled: isEditing,
@@ -288,6 +332,123 @@ class _ProfilePageState extends State<ProfilePage> {
     return TextField(
       controller: controller,
       enabled: isEditing,
+    );
+  }
+
+  // 🔗 SOCIAL LINKS SECTION
+  Widget _socialLinksSection() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.share, color: Colors.teal),
+                const SizedBox(width: 8),
+                Text(
+                  "Social Links",
+                  style: AppStyles.subHeading,
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
+            // ================= INSTAGRAM =================
+            TextField(
+              controller: _instagramController,
+              enabled: isEditing,
+              decoration: const InputDecoration(
+                labelText: "Instagram Username",
+                hintText: "e.g. username",
+                prefixIcon: Icon(Icons.camera_alt),
+              ),
+            ),
+
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text("Show Instagram"),
+              subtitle: Text(
+                instagramVisible
+                    ? "Others can see your Instagram"
+                    : "Others cannot see your Instagram",
+              ),
+              value: instagramVisible,
+              onChanged: isEditing
+                  ? (value) {
+                      setState(() {
+                        instagramVisible = value;
+                      });
+                    }
+                  : null,
+            ),
+
+            const Divider(),
+
+            // ================= FACEBOOK =================
+            TextField(
+              controller: _facebookController,
+              enabled: isEditing,
+              decoration: const InputDecoration(
+                labelText: "Facebook Profile Link",
+                hintText: "https://www.facebook.com/yourprofile",
+                prefixIcon: Icon(Icons.facebook),
+              ),
+            ),
+
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text("Show Facebook"),
+              subtitle: Text(
+                facebookVisible
+                    ? "Others can see your Facebook"
+                    : "Others cannot see your Facebook",
+              ),
+              value: facebookVisible,
+              onChanged: isEditing
+                  ? (value) {
+                      setState(() {
+                        facebookVisible = value;
+                      });
+                    }
+                  : null,
+            ),
+
+            const Divider(),
+
+            // ================= YOUTUBE =================
+            TextField(
+              controller: _youtubeController,
+              enabled: isEditing,
+              decoration: const InputDecoration(
+                labelText: "YouTube Channel Link",
+                hintText: "https://www.youtube.com/@yourchannel",
+                prefixIcon: Icon(Icons.play_circle_fill),
+              ),
+            ),
+
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text("Show YouTube"),
+              subtitle: Text(
+                youtubeVisible
+                    ? "Others can see your YouTube"
+                    : "Others cannot see your YouTube",
+              ),
+              value: youtubeVisible,
+              onChanged: isEditing
+                  ? (value) {
+                      setState(() {
+                        youtubeVisible = value;
+                      });
+                    }
+                  : null,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
