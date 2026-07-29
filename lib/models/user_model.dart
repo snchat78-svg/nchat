@@ -16,6 +16,9 @@ class UserModel {
     final String? instagram;
   final String? facebook;
   final String? youtube;
+  final bool instagramVisible;
+final bool facebookVisible;
+final bool youtubeVisible;
 
 
   UserModel({
@@ -33,6 +36,9 @@ class UserModel {
         this.instagram,
     this.facebook,
     this.youtube,
+    this.instagramVisible = false,
+this.facebookVisible = false,
+this.youtubeVisible = false,
   });
 
   /// ✅ FIX: alias getter (ChatRoomPage uses isOnline)
@@ -55,6 +61,9 @@ class UserModel {
             if (instagram != null) 'instagram': instagram,
       if (facebook != null) 'facebook': facebook,
       if (youtube != null) 'youtube': youtube,
+      'instagramVisible': instagramVisible,
+'facebookVisible': facebookVisible,
+'youtubeVisible': youtubeVisible,
     };
     return map;
   }
@@ -96,6 +105,9 @@ class UserModel {
             instagram: map['instagram']?.toString(),
       facebook: map['facebook']?.toString(),
       youtube: map['youtube']?.toString(),
+      instagramVisible: map['instagramVisible'] == true,
+facebookVisible: map['facebookVisible'] == true,
+youtubeVisible: map['youtubeVisible'] == true,
     );
   }
 
@@ -115,6 +127,9 @@ class UserModel {
         String? instagram,
     String? facebook,
     String? youtube,
+    bool? instagramVisible,
+bool? facebookVisible,
+bool? youtubeVisible,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -131,6 +146,9 @@ class UserModel {
             instagram: instagram ?? this.instagram,
       facebook: facebook ?? this.facebook,
       youtube: youtube ?? this.youtube,
+      instagramVisible: instagramVisible ?? this.instagramVisible,
+facebookVisible: facebookVisible ?? this.facebookVisible,
+youtubeVisible: youtubeVisible ?? this.youtubeVisible,
     );
   }
 }
