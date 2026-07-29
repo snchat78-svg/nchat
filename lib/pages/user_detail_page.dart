@@ -10,7 +10,7 @@ import '../services/chat_request_service.dart';
 import '../services/block_service.dart';
 import '../styles/app_styles.dart';
 import 'package:intl/intl.dart';
-
+import 'package:url_launcher/url_launcher.dart';
 
 class UserDetailPage extends StatefulWidget {
   final UserModel targetUser;
@@ -119,6 +119,32 @@ class _UserDetailPageState extends State<UserDetailPage> {
       if (!mounted) return;
       setState(() => _distanceKm = meters / 1000);
     } catch (_) {}
+  }
+    Future<void> _openSocialLink(String url) async {
+    final uri = Uri.parse(url);
+
+    try {
+      final opened = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+
+      if (!opened && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("❌ Link open नहीं हो सका"),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("❌ Link open नहीं हो सका"),
+        ),
+      );
+    }
   }
 
   Future<void> _toggleBlockStatus() async {
@@ -234,6 +260,115 @@ class _UserDetailPageState extends State<UserDetailPage> {
                   style: AppStyles.subHeading),
 
             const SizedBox(height: 30),
+                        // 🔗 SOCIAL LINKS
+            if ((u.instagram?.trim().isNotEmpty == true &&
+                    u.instagramVisible) ||
+                (u.facebook?.trim().isNotEmpty == true &&
+                    u.facebookVisible) ||
+                (u.youtube?.trim().isNotEmpty == true &&
+                    u.youtubeVisible))
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.share,
+                            color: Colors.teal,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            "Social Links",
+                            style: AppStyles.subHeading,
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      // 📸 INSTAGRAM
+                      if (u.instagram?.trim().isNotEmpty == true &&
+                          u.instagramVisible)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(
+                            Icons.camera_alt,
+                            color: Colors.pink,
+                          ),
+                          title: const Text("Instagram"),
+                          subtitle: Text(
+                            "@${u.instagram!.trim().replaceFirst('@', '')}",
+                          ),
+                          trailing: const Icon(
+                            Icons.open_in_new,
+                            size: 20,
+                          ),
+                          onTap: () {
+                            final username = u.instagram!
+                                .trim()
+                                .replaceFirst('@', '');
+
+                            _openSocialLink(
+                              'https://www.instagram.com/$username/',
+                            );
+                          },
+                        ),
+
+                      // 📘 FACEBOOK
+                      if (u.facebook?.trim().isNotEmpty == true &&
+                          u.facebookVisible)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(
+                            Icons.facebook,
+                            color: Colors.blue,
+                          ),
+                          title: const Text("Facebook"),
+                          subtitle: const Text(
+                            "Open Facebook Profile",
+                          ),
+                          trailing: const Icon(
+                            Icons.open_in_new,
+                            size: 20,
+                          ),
+                          onTap: () {
+                            _openSocialLink(
+                              u.facebook!.trim(),
+                            );
+                          },
+                        ),
+
+                      // ▶️ YOUTUBE
+                      if (u.youtube?.trim().isNotEmpty == true &&
+                          u.youtubeVisible)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(
+                            Icons.play_circle_fill,
+                            color: Colors.red,
+                          ),
+                          title: const Text("YouTube"),
+                          subtitle: const Text(
+                            "Open YouTube Channel",
+                          ),
+                          trailing: const Icon(
+                            Icons.open_in_new,
+                            size: 20,
+                          ),
+                          onTap: () {
+                            _openSocialLink(
+                              u.youtube!.trim(),
+                            );
+                          },
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            const SizedBox(height: 16),
 
             AnimatedScale(
               scale: 1,
