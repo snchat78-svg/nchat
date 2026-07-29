@@ -13,6 +13,10 @@ class UserModel {
   final double? longitude;
   final DateTime? lastSeen; // 🔹 Last seen time
   final bool? online; // 🔹 actual stored field
+    final String? instagram;
+  final String? facebook;
+  final String? youtube;
+
 
   UserModel({
     required this.uid,
@@ -26,6 +30,9 @@ class UserModel {
     this.longitude,
     this.lastSeen,
     this.online,
+        this.instagram,
+    this.facebook,
+    this.youtube,
   });
 
   /// ✅ FIX: alias getter (ChatRoomPage uses isOnline)
@@ -45,6 +52,9 @@ class UserModel {
       if (longitude != null) 'longitude': longitude,
       if (lastSeen != null) 'lastSeen': lastSeen!.toIso8601String(),
       if (online != null) 'online': online,
+            if (instagram != null) 'instagram': instagram,
+      if (facebook != null) 'facebook': facebook,
+      if (youtube != null) 'youtube': youtube,
     };
     return map;
   }
@@ -83,6 +93,9 @@ class UserModel {
       longitude: _asDouble(map['longitude']),
       lastSeen: _asDate(map['lastSeen']),
       online: map['online'] == true,
+            instagram: map['instagram']?.toString(),
+      facebook: map['facebook']?.toString(),
+      youtube: map['youtube']?.toString(),
     );
   }
 
@@ -99,6 +112,9 @@ class UserModel {
     double? longitude,
     DateTime? lastSeen,
     bool? online,
+        String? instagram,
+    String? facebook,
+    String? youtube,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -112,6 +128,9 @@ class UserModel {
       longitude: longitude ?? this.longitude,
       lastSeen: lastSeen ?? this.lastSeen,
       online: online ?? this.online,
+            instagram: instagram ?? this.instagram,
+      facebook: facebook ?? this.facebook,
+      youtube: youtube ?? this.youtube,
     );
   }
 }
