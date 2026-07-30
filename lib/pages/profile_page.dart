@@ -275,13 +275,14 @@ bool youtubeVisible = false;
                   const SizedBox(height: 30),
 
                   if (isEditing)
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: _saveChanges,
-                        icon: const Icon(Icons.save),
-                        label: const Text("Save Changes"),
-                      ),
-                    ),
+  SizedBox(
+    width: double.infinity,
+    child: ElevatedButton.icon(
+      onPressed: _saveChanges,
+      icon: const Icon(Icons.save),
+      label: const Text("Save Changes"),
+    ),
+  ),
                 ],
               ),
             ),
