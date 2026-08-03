@@ -22,7 +22,7 @@ jobs:
         uses: android-actions/setup-android@v3
 
       # ✅ Install API 36
-      - name: Install API 35
+      - name: Install API 36
         run: |
           sdkmanager "platform-tools" "platforms;android-35" "build-tools;36.0.0"
 
