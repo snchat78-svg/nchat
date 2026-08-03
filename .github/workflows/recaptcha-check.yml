@@ -22,7 +22,9 @@ jobs:
 
       - name: Install Android SDK
         run: |
-          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+          sdkmanager "platform-tools" \
+            "platforms;android-36" \
+            "build-tools;36.0.0"
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -32,19 +34,70 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
+      - name: Check Android Gradle Wrapper
+        run: |
+          echo "======================================"
+          echo "   CHECKING ANDROID GRADLE WRAPPER"
+          echo "======================================"
+
+          echo "Current directory:"
+          pwd
+
+          echo ""
+          echo "Repository files:"
+          ls -la
+
+          echo ""
+          echo "Android directory:"
+          ls -la android || true
+
+          echo ""
+          echo "Checking android/gradlew..."
+
+          if [ ! -f android/gradlew ]; then
+            echo ""
+            echo "ERROR: android/gradlew not found"
+            echo ""
+            echo "The Android Gradle Wrapper is missing from the repository."
+            exit 1
+          fi
+
+          echo ""
+          echo "android/gradlew FOUND."
+
       - name: Find reCAPTCHA dependency
         run: |
-          cd android
-          chmod +x gradlew
+          chmod +x android/gradlew
 
-          ./gradlew app:dependencies \
+          echo "======================================"
+          echo "   RUNNING GRADLE DEPENDENCY CHECK"
+          echo "======================================"
+
+          android/gradlew app:dependencies \
             --configuration releaseRuntimeClasspath \
-            > ../dependencies.txt
+            > dependencies.txt
 
+          echo ""
           echo "======================================"
           echo "   reCAPTCHA DEPENDENCY RESULT"
           echo "======================================"
 
           grep -i -B 10 -A 10 \
             "com.google.android.recaptcha:recaptcha" \
-            ../dependencies.txt || true
+            dependencies.txt || true
+
+      - name: Search all reCAPTCHA references
+        run: |
+          echo "======================================"
+          echo "   ALL reCAPTCHA REFERENCES"
+          echo "======================================"
+
+          grep -i -n \
+            "recaptcha" \
+            dependencies.txt || true
+
+      - name: Save dependency report
+        uses: actions/upload-artifact@v4
+        with:
+          name: recaptcha-dependency-report
+          path: dependencies.txt
