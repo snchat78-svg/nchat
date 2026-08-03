@@ -52,10 +52,6 @@ jobs:
 
       # =========================================================
       # 6. TEMPORARY KEYSTORE
-      #
-      # केवल diagnostic workflow के लिए।
-      # इससे app/build.gradle की signing config null error
-      # नहीं आएगी।
       # =========================================================
       - name: Create temporary diagnostic keystore
         run: |
@@ -72,8 +68,6 @@ jobs:
 
       # =========================================================
       # 7. Temporary key.properties
-      #
-      # आपके असली release keystore को touch नहीं करेगा।
       # =========================================================
       - name: Create temporary key.properties
         run: |
@@ -111,8 +105,7 @@ jobs:
             > dependencies.txt
 
       # =========================================================
-      # 11. IMPORTANT:
-      #     Find exact dependency path to reCAPTCHA
+      # 11. Exact reCAPTCHA dependency path
       # =========================================================
       - name: Find exact reCAPTCHA dependency path
         run: |
@@ -146,7 +139,53 @@ jobs:
             recaptcha-insight.txt || true
 
       # =========================================================
-      # 13. Search all reCAPTCHA references
+      # 13. NEW:
+      #     Check Gradle cache for actual reCAPTCHA artifacts
+      # =========================================================
+      - name: Check resolved reCAPTCHA artifacts
+        run: |
+          echo ""
+          echo "======================================================"
+          echo " RESOLVED reCAPTCHA ARTIFACTS IN GRADLE CACHE"
+          echo "======================================================"
+
+          find ~/.gradle/caches/modules-2/files-2.1/com.google.android.recaptcha \
+            -maxdepth 5 \
+            -type f \
+            2>/dev/null | sort || true
+
+          echo ""
+          echo "======================================================"
+          echo " PROJECT reCAPTCHA AAR/JAR FILES"
+          echo "======================================================"
+
+          find . \
+            -type f \
+            \( -name "*recaptcha*.aar" -o -name "*recaptcha*.jar" \) \
+            -not -path "./.git/*" \
+            -not -path "./build/*" \
+            2>/dev/null | sort || true
+
+      # =========================================================
+      # 14. NEW:
+      #     Print exact versions found anywhere in Gradle cache
+      # =========================================================
+      - name: List all cached reCAPTCHA versions
+        run: |
+          echo ""
+          echo "======================================================"
+          echo " ALL CACHED reCAPTCHA VERSIONS"
+          echo "======================================================"
+
+          find ~/.gradle/caches/modules-2/files-2.1/com.google.android.recaptcha \
+            -mindepth 1 \
+            -maxdepth 1 \
+            -type d \
+            -printf "%f\n" \
+            2>/dev/null | sort -V || true
+
+      # =========================================================
+      # 15. Search all reCAPTCHA references
       # =========================================================
       - name: Search all reCAPTCHA references
         run: |
@@ -163,7 +202,7 @@ jobs:
             "recaptcha" . || true
 
       # =========================================================
-      # 14. Firebase Auth dependency path
+      # 16. Firebase Auth dependency path
       # =========================================================
       - name: Find Firebase Auth dependency path
         run: |
@@ -182,7 +221,7 @@ jobs:
           cat firebase-auth-insight.txt
 
       # =========================================================
-      # 15. Search Firebase Auth in full dependency tree
+      # 17. Search Firebase Auth in full dependency tree
       # =========================================================
       - name: Search Firebase Auth in dependency tree
         run: |
@@ -196,7 +235,34 @@ jobs:
             dependencies.txt || true
 
       # =========================================================
-      # 16. Save reports
+      # 18. NEW:
+      #     Check Gradle resolution result for BOTH versions
+      # =========================================================
+      - name: Compare reCAPTCHA versions
+        run: |
+          echo ""
+          echo "======================================================"
+          echo " reCAPTCHA VERSION COMPARISON"
+          echo "======================================================"
+
+          echo ""
+          echo "--- 18.1.2 references ---"
+          grep -Rni \
+            --exclude-dir=.git \
+            --exclude-dir=.dart_tool \
+            --exclude-dir=build \
+            "18.1.2" . || true
+
+          echo ""
+          echo "--- 18.4.0 references ---"
+          grep -Rni \
+            --exclude-dir=.git \
+            --exclude-dir=.dart_tool \
+            --exclude-dir=build \
+            "18.4.0" . || true
+
+      # =========================================================
+      # 19. Save reports
       # =========================================================
       - name: Upload diagnostic reports
         uses: actions/upload-artifact@v4
