@@ -1,4 +1,4 @@
-name: Check reCAPTCHA Dependency
+name: Find reCAPTCHA Dependency
 
 on:
   workflow_dispatch:
@@ -31,58 +31,40 @@ jobs:
         with:
           flutter-version: "3.22.0"
 
-      - name: Get dependencies
+      - name: Get Flutter dependencies
         run: flutter pub get
 
-      - name: Check Android Gradle Wrapper
+      - name: Download Gradle 8.2.2
         run: |
-          echo "======================================"
-          echo "   CHECKING ANDROID GRADLE WRAPPER"
-          echo "======================================"
+          wget -q https://services.gradle.org/distributions/gradle-8.2.2-bin.zip
+          unzip -q gradle-8.2.2-bin.zip
+          echo "$PWD/gradle-8.2.2/bin" >> "$GITHUB_PATH"
 
-          echo "Current directory:"
-          pwd
-
-          echo ""
-          echo "Repository files:"
-          ls -la
-
-          echo ""
-          echo "Android directory:"
-          ls -la android || true
-
-          echo ""
-          echo "Checking android/gradlew..."
-
-          if [ ! -f android/gradlew ]; then
-            echo ""
-            echo "ERROR: android/gradlew not found"
-            echo ""
-            echo "The Android Gradle Wrapper is missing from the repository."
-            exit 1
-          fi
-
-          echo ""
-          echo "android/gradlew FOUND."
+      - name: Check Gradle
+        run: |
+          gradle --version
 
       - name: Find reCAPTCHA dependency
         run: |
-          chmod +x android/gradlew
+          cd android
 
           echo "======================================"
           echo "   RUNNING GRADLE DEPENDENCY CHECK"
           echo "======================================"
 
-          android/gradlew app:dependencies \
+          gradle app:dependencies \
             --configuration releaseRuntimeClasspath \
-            > dependencies.txt
+            --no-daemon \
+            > ../dependencies.txt
+
+          cd ..
 
           echo ""
           echo "======================================"
-          echo "   reCAPTCHA DEPENDENCY RESULT"
+          echo "   reCAPTCHA DEPENDENCY"
           echo "======================================"
 
-          grep -i -B 10 -A 10 \
+          grep -i -B 15 -A 15 \
             "com.google.android.recaptcha:recaptcha" \
             dependencies.txt || true
 
@@ -96,7 +78,7 @@ jobs:
             "recaptcha" \
             dependencies.txt || true
 
-      - name: Save dependency report
+      - name: Upload dependency report
         uses: actions/upload-artifact@v4
         with:
           name: recaptcha-dependency-report
