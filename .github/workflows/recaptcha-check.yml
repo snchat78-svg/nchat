@@ -8,88 +8,201 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # =========================================================
+      # 1. Checkout
+      # =========================================================
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # =========================================================
+      # 2. Java 17
+      # =========================================================
       - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
+      # =========================================================
+      # 3. Android SDK
+      # =========================================================
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
       - name: Install Android SDK
         run: |
-          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+          sdkmanager "platform-tools" \
+            "platforms;android-35" \
+            "build-tools;36.0.0"
 
+      # =========================================================
+      # 4. Flutter
+      # =========================================================
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: "3.22.0"
           channel: stable
 
+      # =========================================================
+      # 5. Flutter dependencies
+      # =========================================================
       - name: Get Flutter dependencies
         run: flutter pub get
 
-      # Gradle को wrapper से डाउनलोड नहीं करेंगे
-      - name: Setup Gradle
+      # =========================================================
+      # 6. TEMPORARY KEYSTORE
+      #
+      # केवल diagnostic workflow के लिए।
+      # इससे app/build.gradle की signing config null error
+      # नहीं आएगी।
+      # =========================================================
+      - name: Create temporary diagnostic keystore
+        run: |
+          keytool -genkeypair \
+            -v \
+            -keystore android/app/diagnostic-key.jks \
+            -alias diagnostic \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -storepass diagnostic123 \
+            -keypass diagnostic123 \
+            -dname "CN=Diagnostic, OU=Test, O=Test, L=Test, ST=Test, C=IN"
+
+      # =========================================================
+      # 7. Temporary key.properties
+      #
+      # आपके असली release keystore को touch नहीं करेगा।
+      # =========================================================
+      - name: Create temporary key.properties
+        run: |
+          cat > android/app/key.properties <<'EOF'
+          storePassword=diagnostic123
+          keyPassword=diagnostic123
+          keyAlias=diagnostic
+          storeFile=diagnostic-key.jks
+          EOF
+
+      # =========================================================
+      # 8. Setup Gradle 8.5
+      # =========================================================
+      - name: Setup Gradle 8.5
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.5"
 
+      # =========================================================
+      # 9. Check Gradle
+      # =========================================================
       - name: Check Gradle
         run: |
           gradle --version
 
-      # Android dependencies की पूरी जांच
-      - name: Find reCAPTCHA Dependency
+      # =========================================================
+      # 10. Resolve Android dependencies
+      # =========================================================
+      - name: Resolve Android dependencies
         run: |
-          echo "=============================================="
-          echo "CHECKING reCAPTCHA DEPENDENCY"
-          echo "=============================================="
-
-          gradle -p android app:dependencies \
+          gradle -p android \
+            app:dependencies \
             --configuration releaseRuntimeClasspath \
+            --no-daemon \
             > dependencies.txt
 
+      # =========================================================
+      # 11. IMPORTANT:
+      #     Find exact dependency path to reCAPTCHA
+      # =========================================================
+      - name: Find exact reCAPTCHA dependency path
+        run: |
           echo ""
-          echo "=============================================="
-          echo "reCAPTCHA RESULT"
-          echo "=============================================="
+          echo "======================================================"
+          echo " EXACT reCAPTCHA DEPENDENCY PATH"
+          echo "======================================================"
 
-          grep -i -B 15 -A 15 \
-            "com.google.android.recaptcha:recaptcha" \
-            dependencies.txt || true
+          gradle -p android \
+            app:dependencyInsight \
+            --dependency com.google.android.recaptcha:recaptcha \
+            --configuration releaseRuntimeClasspath \
+            --no-daemon \
+            > recaptcha-insight.txt || true
 
-      # पूरे project में reCAPTCHA के references खोजें
+          cat recaptcha-insight.txt
+
+      # =========================================================
+      # 12. Search specifically for version 18.1.2
+      # =========================================================
+      - name: Find reCAPTCHA 18.1.2
+        run: |
+          echo ""
+          echo "======================================================"
+          echo " SEARCHING FOR reCAPTCHA 18.1.2"
+          echo "======================================================"
+
+          grep -n -B 20 -A 20 \
+            "com.google.android.recaptcha:recaptcha:18.1.2" \
+            dependencies.txt \
+            recaptcha-insight.txt || true
+
+      # =========================================================
+      # 13. Search all reCAPTCHA references
+      # =========================================================
       - name: Search all reCAPTCHA references
         run: |
-          echo "=============================================="
-          echo "SEARCHING PROJECT"
-          echo "=============================================="
+          echo ""
+          echo "======================================================"
+          echo " ALL reCAPTCHA REFERENCES"
+          echo "======================================================"
 
           grep -Rni \
             --exclude-dir=.git \
             --exclude-dir=.dart_tool \
             --exclude-dir=build \
+            --exclude="diagnostic-key.jks" \
             "recaptcha" . || true
 
-      # Firebase/Auth dependency information भी निकालें
-      - name: Search Firebase Auth dependencies
+      # =========================================================
+      # 14. Firebase Auth dependency path
+      # =========================================================
+      - name: Find Firebase Auth dependency path
         run: |
-          echo "=============================================="
-          echo "FIREBASE AUTH DEPENDENCIES"
-          echo "=============================================="
+          echo ""
+          echo "======================================================"
+          echo " FIREBASE AUTH DEPENDENCY"
+          echo "======================================================"
 
-          grep -i -B 10 -A 20 \
+          gradle -p android \
+            app:dependencyInsight \
+            --dependency com.google.firebase:firebase-auth \
+            --configuration releaseRuntimeClasspath \
+            --no-daemon \
+            > firebase-auth-insight.txt || true
+
+          cat firebase-auth-insight.txt
+
+      # =========================================================
+      # 15. Search Firebase Auth in full dependency tree
+      # =========================================================
+      - name: Search Firebase Auth in dependency tree
+        run: |
+          echo ""
+          echo "======================================================"
+          echo " FIREBASE AUTH REFERENCES"
+          echo "======================================================"
+
+          grep -i -B 15 -A 20 \
             "firebase-auth" \
             dependencies.txt || true
 
-      # Report save करें
-      - name: Upload dependency report
+      # =========================================================
+      # 16. Save reports
+      # =========================================================
+      - name: Upload diagnostic reports
         uses: actions/upload-artifact@v4
         with:
-          name: recaptcha-dependency-report
-          path: dependencies.txt
+          name: recaptcha-diagnostic-report
+          path: |
+            dependencies.txt
+            recaptcha-insight.txt
+            firebase-auth-insight.txt
