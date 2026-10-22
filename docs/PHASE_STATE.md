@@ -5,12 +5,12 @@ This is the canonical cross-chat handoff for this repository. Read it before mak
 ## Repository
 - Repository: [snchat78-svg/nchat](https://github.com/snchat78-svg/nchat)
 - Active branch: `main`
-- Current head after continuity documentation: `2c1f6bd7b3213d32f34b24cc331f054cd0c15db0`
+- Verify the live `main` head each time this file is used; later documentation-only commits can move the branch without validating application code.
 - Phase policy: [PHASE_CONTINUITY_STANDARD.md](PHASE_CONTINUITY_STANDARD.md)
 
 ## Phase status
 - **Canonical phase register:** newly initialized; historical completed phases have not yet been audited into a formal phase ledger. This does not mean no earlier work exists.
-- **Last observed workflow success on the application-code head:** [run 30822392713](https://github.com/snchat78-svg/nchat/actions/runs/30822392713), code head `696c458cbbbeeefecb517792074f0091b0d6ff1a`. The run is associated with reCAPTCHA diagnostic workflow changes; treat it as diagnostic-workflow evidence, not proof of full application behavior or production authentication.
+- **Last observed workflow success on the application-code head:** [run 30822392713](https://github.com/snchat78-svg/nchat/actions/runs/30822392713), code head `696c458cbbbeeefecb517792074f0091b0d6ff1a`. The run is associated with reCAPTCHA diagnostic workflow changes; treat it as diagnostic-workflow evidence, not proof of full application behavior or production authentication. Subsequent commits added continuity documentation only; they do not constitute a full application acceptance run.
 - Earlier Gradle/diagnostic workflow failures exist in Actions history. Do not claim broad release acceptance from a green diagnostic workflow alone.
 - Current continuity-doc commit is newer than the last observed application-code run; check the newest applicable run before any implementation phase.
 
